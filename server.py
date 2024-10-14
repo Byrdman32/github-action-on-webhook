@@ -11,23 +11,23 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Fetch environment variables from environment
+# Fetch environment variables from .env or system environment
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-REPO_OWNER = os.getenv('REPO_OWNER')
-REPO_NAME = os.getenv('REPO_NAME')
+REPOS = os.getenv('REPOS', '').split(',')
 WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET')
 EVENT_TYPE = 'test_result'
 
-# GitHub API URL to trigger repository dispatch
-url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/dispatches"
-
+# GitHub API Headers
 headers = {
     "Authorization": f"Bearer {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
 }
 
-def trigger_repository_dispatch(message, passed):
-    if not GITHUB_TOKEN or not REPO_OWNER or not REPO_NAME:
+def trigger_repository_dispatch(repo_owner, repo_name, message, passed):
+    """Trigger the workflow dispatch event for a specific repository."""
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/dispatches"
+
+    if not GITHUB_TOKEN or not repo_owner or not repo_name:
         print("Error: Missing environment variables or configuration.")
         return
 
@@ -42,17 +42,17 @@ def trigger_repository_dispatch(message, passed):
     try:
         response = requests.post(url, headers=headers, data=json.dumps(data))
         if response.status_code == 204:
-            print("Repository Dispatch event triggered successfully!")
+            print(f"Repository Dispatch event triggered successfully for {repo_owner}/{repo_name}!")
         else:
-            print(f"Failed to trigger Repository Dispatch. Status code: {response.status_code}")
+            print(f"Failed to trigger Repository Dispatch for {repo_owner}/{repo_name}. Status code: {response.status_code}")
             print(response.text)
 
     except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+        print(f"Request failed for {repo_owner}/{repo_name}: {e}")
     except json.JSONDecodeError as e:
-        print(f"JSON decode error: {e}")
+        print(f"JSON decode error for {repo_owner}/{repo_name}: {e}")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"An unexpected error occurred for {repo_owner}/{repo_name}: {e}")
 
 def verify_signature(request):
     """Verify the GitHub webhook signature using the secret."""
@@ -73,6 +73,7 @@ def verify_signature(request):
 
 @app.route('/webhook', methods=['POST'])
 def github_webhook():
+    """Route to handle the GitHub webhook and trigger the dispatch."""
     # Verify the request signature
     verify_signature(request)
 
@@ -83,7 +84,11 @@ def github_webhook():
             print("Push event detected on main branch")
             pusher = payload.get('pusher', {}).get('name', 'Unknown user')
             commit_message = payload.get('head_commit', {}).get('message', 'No commit message')
-            trigger_repository_dispatch(message=f"Pushed by {pusher}: {commit_message}", passed=True)
+
+            # Loop through all the repositories listed in .env and trigger dispatch for each
+            for repo in REPOS:
+                repo_owner, repo_name = repo.split('/')
+                trigger_repository_dispatch(repo_owner, repo_name, message=f"Pushed by {pusher}: {commit_message}", passed=True)
 
         return jsonify({'status': 'received'}), 200
     else:
@@ -95,4 +100,4 @@ def page_not_found(e):
     return jsonify({"error": "This route is not defined. Please use a valid route!"}), 404
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000,)
+    app.run(host='0.0.0.0', port=5000)

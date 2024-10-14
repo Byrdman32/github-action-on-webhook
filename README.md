@@ -29,8 +29,7 @@ You should create a `.env` file in the root of your project with the following c
 GITHUB_TOKEN=your_github_personal_access_token
 
 # GitHub Repository owner and name for triggering repository_dispatch
-REPO_OWNER=your_github_username_or_org
-REPO_NAME=your_repository_name
+REPOS=your_github_username_or_org/your_repository_name,your_github_username_or_org2/your_repository_name2,...
 
 # Webhook Secret for verifying incoming GitHub webhooks
 WEBHOOK_SECRET=your_webhook_secret_key
