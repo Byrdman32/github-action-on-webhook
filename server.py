@@ -89,6 +89,10 @@ def github_webhook():
     else:
         return jsonify({'error': 'Invalid method'}), 405
 
+# Catch-all route to handle any undefined routes
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify({"error": "This route is not defined. Please use a valid route!"}), 404
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000,)
