@@ -38,7 +38,7 @@ WEBHOOK_SECRET=your_webhook_secret_key
 PORT=5000
 
 # Event name for triggering repository_dispatch
-EVENT_NAME=your_trigger
+EVENT_TYPE=your_trigger
 ```
 
 ### How to Use the `.env` File:
