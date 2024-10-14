@@ -15,7 +15,7 @@ app = Flask(__name__)
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPOS = os.getenv('REPOS', '').split(',')
 WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET')
-EVENT_TYPE = 'test_result'
+EVENT_TYPE = os.getenv('EVENT_TYPE')
 
 # GitHub API Headers
 headers = {
