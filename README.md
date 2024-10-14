@@ -36,6 +36,9 @@ WEBHOOK_SECRET=your_webhook_secret_key
 
 # Port for running Flask app
 PORT=5000
+
+# Event name for triggering repository_dispatch
+EVENT_NAME=your_trigger
 ```
 
 ### How to Use the `.env` File:
