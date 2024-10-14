@@ -24,7 +24,7 @@ headers = {
 }
 
 def trigger_repository_dispatch(repo_owner, repo_name, message, passed):
-    """Trigger the workflow dispatch event for a specific repository."""
+    """Trigger the repository dispatch event for a specific repository."""
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/dispatches"
 
     if not GITHUB_TOKEN or not repo_owner or not repo_name:
