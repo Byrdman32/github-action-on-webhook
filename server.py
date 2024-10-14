@@ -80,8 +80,8 @@ def github_webhook():
     if request.method == 'POST':
         payload = request.json
 
-        if payload.get('ref') and payload['ref'] == 'refs/heads/main':
-            print("Push event detected on main branch")
+        if payload.get('ref') and payload['ref'] == 'refs/heads/master':
+            print("Push event detected on master branch")
             pusher = payload.get('pusher', {}).get('name', 'Unknown user')
             commit_message = payload.get('head_commit', {}).get('message', 'No commit message')
 
