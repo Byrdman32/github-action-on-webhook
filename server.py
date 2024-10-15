@@ -87,10 +87,19 @@ def github_webhook():
             pusher = payload.get('pusher', {}).get('name', 'Unknown user')
             commit_message = payload.get('head_commit', {}).get('message', 'No commit message')
 
-            # Loop through all the repositories listed in .env and trigger dispatch for each
-            for repo in REPOS:
-                repo_owner, repo_name = repo.split('/')
-                trigger_repository_dispatch(repo_owner, repo_name, message=f"Pushed by {pusher}: {commit_message}", passed=True)
+            # Check if 'manifest.json' was modified in the push
+            head_commit = payload.get('head_commit', {})
+            modified_files = head_commit.get('modified', [])
+
+            if "manifest.json" in modified_files:
+                print("manifest.json was modified")
+            
+                # Loop through all the repositories listed in .env and trigger dispatch for each
+                for repo in REPOS:
+                    repo_owner, repo_name = repo.split('/')
+                    trigger_repository_dispatch(repo_owner, repo_name, message=f"Pushed by {pusher}: {commit_message}", passed=True)
+            else:
+                print("manifest.json was not modified")
 
         return jsonify({'status': 'received'}), 200
     else:
